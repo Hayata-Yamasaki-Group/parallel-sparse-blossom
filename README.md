@@ -206,6 +206,6 @@ The package deliberately omits temporary parameter-launch scripts, background-jo
 
 ## Third-party code
 
-Files under `src/pymatching/` are derived from **PyMatching** and retain their original copyright and Apache-2.0 license headers. A copy of the PyMatching Apache-2.0 license is included as `LICENSE-PyMatching`.
+Files under `src/pymatching/` are derived from **PyMatching** presented by Oscar Higgott, Craig Gidney and other contributors, and retain their original copyright and Apache-2.0 license headers. A copy of the PyMatching Apache-2.0 license is included as `LICENSE-PyMatching`.
 
 Stim is used as a Python dependency for case generation and is not vendored in this repository.
