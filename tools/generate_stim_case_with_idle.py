@@ -145,6 +145,7 @@ def make_base_surface_code_circuit(
     rounds: int,
     p: float,
     p1q_factor: float,
+    before_round_data_factor: float,
     task: str,
 ) -> stim.Circuit:
     """Create the target surface-code circuit before optional explicit idle noise."""
@@ -157,8 +158,7 @@ def make_base_surface_code_circuit(
         after_clifford_depolarization=p,
         after_reset_flip_probability=p,
         before_measure_flip_probability=p,
-        # Idle/data-round noise is disabled for the requested model.
-        before_round_data_depolarization=0,
+        before_round_data_depolarization=p * before_round_data_factor,
     )
     return retune_single_qubit_clifford_noise(circuit, p * p1q_factor)
 
@@ -170,6 +170,7 @@ def make_surface_code_circuit(
     p: float,
     p1q_factor: float,
     idle_factor: float,
+    before_round_data_factor: float,
     task: str,
 ) -> stim.Circuit:
     """Create a Stim circuit with 2Q=p, 1Q=p*p1q_factor, prep/meas=p, idle=p*idle_factor."""
@@ -178,6 +179,7 @@ def make_surface_code_circuit(
         rounds=rounds,
         p=p,
         p1q_factor=p1q_factor,
+        before_round_data_factor=before_round_data_factor,
         task=task,
     )
     p_idle = p * idle_factor
@@ -315,6 +317,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--p", type=float, default=0.001, help="Base error rate: 2Q, preparation, and measurement.")
     parser.add_argument("--p1q-factor", type=float, default=0.1, help="1Q Clifford error rate as a factor of --p (default: 0.1).")
     parser.add_argument("--idle-factor", type=float, default=0.0, help="Explicit idle error rate as a factor of --p (default: 0).")
+    parser.add_argument("--before-round-data-factor", type=float, default=0.0, help="Stim before_round_data_depolarization as a factor of --p (uniform compatibility: 1.0).")
     parser.add_argument("--shots", type=int, default=256)
     parser.add_argument("--seed", type=int, default=217)
     parser.add_argument("--task", default="surface_code:rotated_memory_x")
@@ -335,6 +338,7 @@ def main() -> None:
         p=args.p,
         p1q_factor=args.p1q_factor,
         idle_factor=args.idle_factor,
+        before_round_data_factor=args.before_round_data_factor,
         task=args.task,
     )
 
