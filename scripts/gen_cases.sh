@@ -11,6 +11,7 @@ P_VALUE=""
 NOISE_MODEL="physical"
 P1Q_FACTOR="0.1"
 IDLE_FACTOR="0"
+BEFORE_ROUND_DATA_FACTOR="0"
 SHOTS=256
 SEED_BASE=200
 DEFAULT_START_DISTANCE=5
@@ -43,8 +44,8 @@ while [[ $# -gt 0 ]]; do
       require_value "$1" "${2-}"
       NOISE_MODEL="$2"
       case "$NOISE_MODEL" in
-        physical|physically_motivated) P1Q_FACTOR="0.1"; IDLE_FACTOR="0" ;;
-        uniform) P1Q_FACTOR="1.0"; IDLE_FACTOR="1.0" ;;
+        physical|physically_motivated) P1Q_FACTOR="0.1"; IDLE_FACTOR="0"; BEFORE_ROUND_DATA_FACTOR="0" ;;
+        uniform) P1Q_FACTOR="1.0"; IDLE_FACTOR="1.0"; BEFORE_ROUND_DATA_FACTOR="1.0" ;;
         *) die "--noise-model must be 'physical' or 'uniform'" ;;
       esac
       shift 2
@@ -71,5 +72,5 @@ for distance in "${DISTANCES[@]}"; do
   out_name="$(render_case_template "$OUT_TEMPLATE" "$distance" "$rounds" "$seed" "$SHOTS" "$P_VALUE")"
   out_path="$CASE_DIR/$out_name"
   echo "Generating d=$distance -> $out_path"
-  python3 "$GENERATOR" --distance "$distance" --rounds "$rounds" --p "$P_VALUE" --p1q-factor "$P1Q_FACTOR" --idle-factor "$IDLE_FACTOR" --shots "$SHOTS" --seed "$seed" --out "$out_path"
+  python3 "$GENERATOR" --distance "$distance" --rounds "$rounds" --p "$P_VALUE" --p1q-factor "$P1Q_FACTOR" --idle-factor "$IDLE_FACTOR" --before-round-data-factor "$BEFORE_ROUND_DATA_FACTOR" --shots "$SHOTS" --seed "$seed" --out "$out_path"
 done
