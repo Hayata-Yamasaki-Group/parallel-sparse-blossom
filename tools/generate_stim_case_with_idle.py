@@ -34,11 +34,6 @@ import stim
 
 
 def insert_idle_depolarization(circuit: stim.Circuit, p: float) -> stim.Circuit:
-    """
-    各TICKごとに idle qubit に DEPOLARIZE1(p) を挿入する。
-    REPEAT ブロックも再帰的に処理する。
-    MR の後に X_ERROR がある場合は、その qubit に idle depolarization を2回追加。
-    """
 
     def process_block(block: stim.Circuit, all_qubits: set[int], repeat_flag: bool) -> stim.Circuit:
         flag = repeat_flag
@@ -50,19 +45,16 @@ def insert_idle_depolarization(circuit: stim.Circuit, p: float) -> stim.Circuit:
         for inst in block:
             name = inst.name
 
-            # QUBIT_COORDS はそのままコピー
             if name == "QUBIT_COORDS":
                 new_block.append(inst)
                 continue
 
-            # REPEATブロックは再帰的に処理
             if name == "REPEAT":
                 repeat_count = inst.repeat_count
                 processed_body = process_block(inst.body_copy(), all_qubits, 1)
                 new_block.append(stim.CircuitRepeatBlock(repeat_count, processed_body))
                 continue
 
-            # TICK の前に idle depolarization を入れる
             if name == "TICK":
                 if flag == 1:
                     flag = 0
@@ -76,7 +68,6 @@ def insert_idle_depolarization(circuit: stim.Circuit, p: float) -> stim.Circuit:
                     last_mr_qubits.clear()
                     continue
 
-            # MR → 次の X_ERROR の特別処理のため記録
             if name == "MR":
                 mr_qubits = set()
                 for g in inst.target_groups():
@@ -88,18 +79,15 @@ def insert_idle_depolarization(circuit: stim.Circuit, p: float) -> stim.Circuit:
                 last_mr_qubits = mr_qubits
                 continue
 
-            # MRの直後のX_ERRORの特別処理
             if last_was_mr and name == "X_ERROR":
                 err_qubits = {t.value for g in inst.target_groups() for t in g}
                 if err_qubits == last_mr_qubits:
-                    # MR直後のX_ERRORなので2回idle depol追加（後でMR idleに対応）
                     new_block.append(inst)
                     new_block.append(stim.CircuitInstruction("DEPOLARIZE1", sorted(all_qubits - err_qubits), [p]))
                     new_block.append(stim.CircuitInstruction("DEPOLARIZE1", sorted(all_qubits - err_qubits), [p]))
                     last_was_mr = False
                     continue
 
-            # 通常命令
             new_block.append(inst)
             for g in inst.target_groups():
                 for t in g:
@@ -107,20 +95,17 @@ def insert_idle_depolarization(circuit: stim.Circuit, p: float) -> stim.Circuit:
             last_was_mr = False
             last_mr_qubits.clear()
 
-        # ブロック末尾に idle depolarization を追加（最後のTICK後）
         idle = sorted(all_qubits - tick_qubits)
         if idle:
             new_block.append(stim.CircuitInstruction("DEPOLARIZE1", idle, [p]))
 
         return new_block
 
-    # 全 qubit index を抽出
     all_qubits = set()
     for inst in circuit:
         if inst.name == "QUBIT_COORDS":
             all_qubits.add(inst.target_groups()[0][0].value)
 
-    # 処理本体
     return process_block(circuit, all_qubits, 0)
 
 
