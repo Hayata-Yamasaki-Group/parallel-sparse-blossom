@@ -4,6 +4,22 @@ This repository contains the code and numerical data used for the event-count ex
 
 The public package contains the **fixed parallel sparse-blossom** experiment used in the current manuscript, together with the non-parallel global sparse-blossom baseline used for comparison.
 
+If you use this code or the accompanying numerical data in your work, please cite the following paper:
+
+[![arXiv](https://img.shields.io/badge/arXiv-2609.12262-b31b1b.svg)](https://arxiv.org/abs/2609.12262)
+
+```bibtex
+@misc{mikami2026sparseblossomdecodingo1time,
+  title        = {Sparse-Blossom Decoding in $o(1)$ Time},
+  author       = {Ryo Mikami and Hayata Yamasaki},
+  year         = {2026},
+  eprint       = {2609.12262},
+  archivePrefix = {arXiv},
+  primaryClass = {quant-ph},
+  url          = {https://arxiv.org/abs/2609.12262},
+}
+```
+
 ## Repository layout
 
 ```text
